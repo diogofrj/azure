@@ -8,7 +8,7 @@
 #####	E-MAIL:				dfernandes@4mstech.com 			
 #####	DISTRO:				
 #####	LICENÇA:			GPLv3 			
-#####	PROJETO:			https://github.com/mauriciodez/clonavm_lnx.git
+#####	PROJETO:			https://github.com/diogofrj/clonavm_lnx.git
 
 # Color Output Variables: http://kedar.nitty-witty.com/blog/how-to-echo-colored-text-in-shell-script #
 txtrst=$(tput sgr0) # Text reset
