@@ -4,11 +4,11 @@
 #####	VERSÃO:				1.0
 #####	DESCRIÇÃO:			Script para clone de VM no mesmo Resource Group com a finalidade de correcao de Taxonomia dos recursos de uma VM no Azure			
 #####	DATA DA CRIAÇÃO:	18/08/2020
-#####	ESCRITO POR:		Diogo Fernandes e Nelys Santos
+#####	ESCRITO POR:		Diogo Fernandes
 #####	E-MAIL:				dfernandes@4mstech.com 			
-#####	DISTRO:				
-#####	LICENÇA:			GPLv3 			
-#####	PROJETO:			https://github.com/diogofrj/clonavm_lnx.git
+
+
+
 
 # Color Output Variables: http://kedar.nitty-witty.com/blog/how-to-echo-colored-text-in-shell-script #
 txtrst=$(tput sgr0) # Text reset
