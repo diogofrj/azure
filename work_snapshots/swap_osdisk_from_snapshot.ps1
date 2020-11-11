@@ -1,11 +1,11 @@
 #####   NOME:               swap_osdisk_from_snapshot.ps1
 #####   VERSÃO:             1.0
-#####   DESCRIÇÃO:          Gera Snapshots de uma VM Azure.
+#####   DESCRIÇÃO:          Troca o disco de S.O de uma VM de um Snapshot Existente.
 #####   DATA DA CRIAÇÃO:    11/11/2020
 #####   WRITTEN BY:         Diogo Fernandes
 #####   E-MAIL:             dfernandes@4mstech.com
 #####   DISTRIBUTION:       Windows/Linux
-#####   REFERENCE:          https://docs.microsoft.com/pt-br/azure/virtual-machines/scripts/virtual-machines-powershell-sample-copy-managed-disks-vhd
+#####   REFERENCE:          https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-powershell-sample-create-managed-disk-from-snapshot
 
 ############################# PERSONALIZADO ########################################
 $VMName = "vmwindows"
