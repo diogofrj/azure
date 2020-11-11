@@ -104,33 +104,4 @@ if ($vm.StorageProfile.DataDisks.Count -gt '0' -And $snapdatadisks -ne '0') {
 
 
 
-
-<#
-
-$azcp = (((Get-Command azcopy -ErrorAction SilentlyContinue).Path).count -ne 0)
-
-if ($savetoblob = 1) {
-    if($azcp -eq "True" )
-    {
-        $containerSASURI = New-AzStorageContainerSASToken -Context $destinationContext -ExpiryTime(get-date).AddSeconds($sasExpiryDuration) -FullUri -Name $storageContainerName -Permission rw
-        Write-Host "`nExporting Snapshot and Copy to Blob..." -ForegroundColor Cyan
-        $containername,$sastokenkey = $containerSASURI -split "\?"
-        $containerSASURI = "$containername/$destinationVHDFileName`?$sastokenkey"
-        azcopy copy $sas.AccessSAS $containerSASURI
-        Write-Host -ForegroundColor Green "`n$destinationVHDFileName Exported Sucessfully..." 
-
-        Revoke-AzSnapshotAccess -ResourceGroupName $rgName -DiskName $diskName
-    } else {
-    #Generate the SAS for the snapshot 
-    $sas = Grant-AzSnapshotAccess -ResourceGroupName $rgName -SnapshotName $OSSnapshot.Name  -DurationInSecond $sasExpiryDuration -Access Read
-    #Create the context for the storage account which will be used to copy snapshot to the storage account 
-    $destinationContext = Get-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
-
-    #Copy the snapshot to the storage account 
-    Write-Host "`nExporting Snapshot and Copy to Blob..." -ForegroundColor Cyan
-    Start-AzStorageBlobCopy -AbsoluteUri $sas.AccessSAS -DestContainer $storageContainerName -DestContext $destinationContext -DestBlob $destinationVHDFileName   
-    Write-Host "`n$destinationVHDFileName Exported Sucessfully..." -ForegroundColor Green
-    Revoke-AzSnapshotAccess -ResourceGroupName $rgName -DiskName $diskName
-    }
-}
-#>
+(Get-AzSnapshot -SnapshotName "SNAP-$VMName*").Name
