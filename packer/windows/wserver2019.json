@@ -1,0 +1,111 @@
+{
+    "_comment_variables": "TEMPLATE WINDOWS 2019",
+    "variables": {
+        "azure-subscription-id": "{{env `MY_AZURE_SUBSCRIPTION_ID`}}",
+        "azure-client-id": "{{env `MY_AZURE_CLIENT_ID`}}",
+        "azure-secret": "{{env `MY_AZURE_SECRET`}}",
+        "azure-tenant": "{{env `MY_AZURE_TENANT`}}",
+
+        "sig-rg": "rg-sig",
+        "sig-name": "sigpacker",
+        "image-definition": "Windows2019",
+        "old-image-version": "1.0.0",
+        "new-image-version": "2.0.0",
+        
+        "network-rg": "RG-NETWORKS",
+        "network-vnet": "VN-FAILOVER",
+        "network-subnet": "SN-FAILOVER",
+        
+        "azure-region": "eastus2",
+        "vm-size": "Standard_d4as_v4"
+    },
+    "_comment_builder_azure": "IMAGEM GERADA APARTIR DA GALERIA PARA UMA NOVA VERSÃO NA MESMA GALERIA",
+    "builders": [
+        {
+            "type": "azure-arm",
+            "subscription_id": "{{user `azure-subscription-id`}}",
+            "client_id": "{{user `azure-client-id`}}",
+            "client_secret": "{{user `azure-secret`}}",
+            "tenant_id": "{{user `azure-tenant`}}",
+
+            "virtual_network_resource_group_name": "{{user `network-rg`}}",
+            "virtual_network_name": "{{user `network-vnet`}}",
+            "virtual_network_subnet_name": "{{user `network-subnet`}}",
+            "private_virtual_network_with_public_ip": true,
+
+            "boot_diag_storage_account": "cloudshell2512",
+            "os_type": "Windows",
+            "os_disk_size_gb": 35,
+            "disk_additional_size" : [10,10],
+
+            "location": "{{user `azure-region`}}",
+            "vm_size": "{{user `vm-size`}}",
+
+            "azure_tags": {
+                "ApplicationName": "IMAGES",
+                "department": "INFRA BASICA E CLOUD",
+                "owner": "Diogo Fernandes",
+                "owner-contact": "diogo@exemple.com",
+                "technical-contact": "diogo@example.com"
+            },
+            "shared_image_gallery": {
+                "subscription": "{{user `azure-subscription-id`}}",
+                "resource_group": "{{user `sig-rg`}}",
+                "gallery_name": "{{user `sig-name`}}",
+                "image_name": "{{user `image-definition`}}",
+                "image_version": "{{user `old-image-version`}}"
+            },
+            "shared_image_gallery_destination": {
+                "resource_group": "{{user `sig-rg`}}",
+                "gallery_name": "{{user `sig-name`}}",
+                "image_name": "{{user `image-definition`}}",
+                "image_version": "{{user `new-image-version`}}",
+                "replication_regions": ["eastus2"]
+            },
+            "managed_image_resource_group_name": "{{user `sig-rg`}}",
+            "managed_image_name": "WindowsServer2019-{{timestamp}}",
+
+            "communicator": "winrm",
+            "winrm_use_ssl": true,
+            "winrm_insecure": true,
+            "winrm_timeout": "5m",
+            "winrm_username": "packer"
+        }
+    ],
+    "_comment_provisioners": "Windows Update + Comandos + Sysprep",
+    "provisioners": [
+        {
+            "type": "powershell",
+            "inline": [
+
+            "Write-Host \"Windows Update...\"",
+                "Set-ExecutionPolicy Bypass -Scope Process -Force",
+                "Install-PackageProvider -Name NuGet -Force",
+                "Install-Module PSWindowsUpdate -Force",
+                "Import-Module PSWindowsUpdate",
+                "Install-WindowsUpdate -ForceDownload -AcceptAll -AutoReboot"
+            ]
+        },
+        {
+            "type": "windows-restart",
+            "restart_check_command": "powershell -command \"&amp; {Write-Output 'Machine restartedd.'}\""
+        },
+        {
+            "type": "powershell",
+            "inline": [
+            "Write-Host \"Wating WAAGENT Running...\"",
+                "  while ((Get-Service RdAgent).Status -ne 'Running') { Start-Sleep -s 5 }",
+                "  while ((Get-Service WindowsAzureGuestAgent).Status -ne 'Running') { Start-Sleep -s 5 }",
+            "Write-Host \"Install IIS...\"",
+                "Install-WindowsFeature -name Web-Server -IncludeManagementTools",
+                "Install-WindowsFeature Web-Asp-Net45",
+            "Write-Host \"Enable Telnet...\"",
+                "dism /online /Enable-Feature /FeatureName:TelnetClient",
+            "Write-Host \"Sysprep...\"",
+                "& Remove-Item -Path $env:SystemRoot\\Panther -Confirm:$false -Force -Recurse",
+                "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit /mode:vm",
+                "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
+            ]
+        }
+    ]
+}
